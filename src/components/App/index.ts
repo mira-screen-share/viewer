@@ -1,1 +1,1 @@
-export { App } from "./component";
+export { App } from "./view";
