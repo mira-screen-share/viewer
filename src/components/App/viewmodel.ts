@@ -28,7 +28,7 @@ export class AppViewModel {
     public join = () => {
         this.serverConnection.send(
             JSON.stringify({
-                join: true,
+                type: "join",
                 uuid: this.uuid,
             })
         );
@@ -37,7 +37,7 @@ export class AppViewModel {
     public leave = () => {
         this.serverConnection.send(
             JSON.stringify({
-                leave: true,
+                type: "leave",
                 uuid: this.uuid,
             })
         );
@@ -56,40 +56,50 @@ export class AppViewModel {
 
         this.serverConnection.onmessage = (event) => {
             const signal = JSON.parse(event.data);
-            console.log(signal)
+            console.log(signal);
 
             if (signal.uuid == this.uuid) return;
 
-            if (signal.sdp) { // Offer from sharer
-                this.sharerConnection
-                    .setRemoteDescription(new RTCSessionDescription(signal.sdp))
-                    .then(() => {
-                        // Reply answer
-                        this.sharerConnection.createAnswer().then(description => {
-                            this.sharerConnection
-                                .setLocalDescription(description)
-                                .then(() => {
-                                    this.serverConnection.send(
-                                        JSON.stringify({
-                                            sdp: description,
-                                            uuid: this.uuid,
-                                        })
-                                    );
-                                    this.setJoined(true);
-                                }).catch(onError);
+            switch (signal.type) {
+                case "offer": // Offer from sharer
+                    this.sharerConnection
+                        .setRemoteDescription(new RTCSessionDescription(signal.sdp))
+                        .then(() => {
+                            // Reply answer
+                            this.sharerConnection.createAnswer().then(description => {
+                                this.sharerConnection
+                                    .setLocalDescription(description)
+                                    .then(() => {
+                                        this.serverConnection.send(
+                                            JSON.stringify({
+                                                type: "answer",
+                                                sdp: description,
+                                                uuid: this.uuid,
+                                            })
+                                        );
+                                        this.setJoined(true);
+                                    }).catch(onError);
+                            }).catch(onError);
                         }).catch(onError);
-                    }).catch(onError);
-            } else if (signal.ice) {
-                this.sharerConnection
-                    .addIceCandidate(new RTCIceCandidate(signal.ice))
-                    .catch(onError);
+                    break;
+                case "ice":
+                    this.sharerConnection
+                        .addIceCandidate(new RTCIceCandidate(signal.ice))
+                        .catch(onError);
+                    break;
+                default:
+                    break;
             }
         };
 
         this.sharerConnection.onicecandidate = (event) => {
             if (event.candidate != null) {
                 this.serverConnection.send(
-                    JSON.stringify({ice: event.candidate, uuid: this.uuid})
+                    JSON.stringify({
+                        type: "ice",
+                        ice: event.candidate,
+                        uuid: this.uuid
+                    })
                 );
             }
         };
