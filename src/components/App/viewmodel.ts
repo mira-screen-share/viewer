@@ -5,6 +5,8 @@ import { action, computed, makeObservable, observable } from "mobx";
 
 const onError = (error: any) => console.log(error);
 
+type MouseAction = "up" | "down" | "move";
+
 export class AppViewModel {
     private sharerConnection = new RTCPeerConnection(SharerConnectionConfig);
     private serverConnection = new WebSocket(SignallerUrl);
@@ -51,16 +53,17 @@ export class AppViewModel {
         this.serverConnection.close();
     };
 
-    public onVideoClick = (event: MouseEvent) => {
+    public onVideoMouse = (action: MouseAction) => (event: MouseEvent) => {
         event.preventDefault();
         if (this.video.current!.videoWidth == 0
             || this.video.current!.videoHeight == 0) {
             return;
         }
-        console.log({
-            type: "click",
-            ...this.toSharerCoordinate(event.offsetX, event.offsetY),
-        });
+        // console.log({
+        //     type: "mouse",
+        //     action: action,
+        //     ...this.toSharerCoordinate(event.offsetX, event.offsetY),
+        // });
     };
 
     public onVideoWheel = (event: WheelEvent) => {
@@ -69,12 +72,12 @@ export class AppViewModel {
             || this.video.current!.videoHeight == 0) {
             return;
         }
-        console.log({
-            type: "scroll",
-            ...this.toSharerCoordinate(event.offsetX, event.offsetY),
-            dx: event.deltaX,
-            dy: event.deltaY,
-        });
+        // console.log({
+        //     type: "scroll",
+        //     ...this.toSharerCoordinate(event.offsetX, event.offsetY),
+        //     dx: event.deltaX,
+        //     dy: event.deltaY,
+        // });
     };
 
     private toSharerCoordinate = (mouseX: number, mouseY: number) => {

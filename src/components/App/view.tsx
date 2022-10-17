@@ -10,7 +10,9 @@ export class App extends React.Component {
 
     componentDidMount() {
         window.addEventListener("beforeunload", this.model.terminate);
-        this.model.video.current!.onclick = this.model.onVideoClick;
+        this.model.video.current!.onmouseup = this.model.onVideoMouse("up");
+        this.model.video.current!.onmousedown = this.model.onVideoMouse("down");
+        this.model.video.current!.onmousemove = this.model.onVideoMouse("move");
         this.model.video.current!.onwheel = this.model.onVideoWheel;
     }
 
