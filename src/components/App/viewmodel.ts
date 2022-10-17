@@ -51,6 +51,53 @@ export class AppViewModel {
         this.serverConnection.close();
     };
 
+    public onVideoClick = (event: MouseEvent) => {
+        event.preventDefault();
+        if (this.video.current!.videoWidth == 0
+            || this.video.current!.videoHeight == 0) {
+            return;
+        }
+        console.log({
+            type: "click",
+            ...this.toSharerCoordinate(event.offsetX, event.offsetY),
+        });
+    };
+
+    public onVideoWheel = (event: WheelEvent) => {
+        event.preventDefault();
+        if (this.video.current!.videoWidth == 0
+            || this.video.current!.videoHeight == 0) {
+            return;
+        }
+        console.log({
+            type: "scroll",
+            ...this.toSharerCoordinate(event.offsetX, event.offsetY),
+            dx: event.deltaX,
+            dy: event.deltaY,
+        });
+    };
+
+    private toSharerCoordinate = (mouseX: number, mouseY: number) => {
+        const viewW = this.video.current!.offsetWidth;
+        const viewH = this.video.current!.offsetHeight;
+        const videoW = this.video.current!.videoWidth;
+        const videoH = this.video.current!.videoHeight;
+
+        if ((viewH / viewW) > (videoH / videoW)) {
+            // Extra space on top and bottom
+            const scale = viewW / videoW;
+            const x = mouseX / scale;
+            const y = (mouseY - (viewH - videoH * scale) / 2) / scale;
+            return {x: x, y: y};
+        } else {
+            // Extra space on left and right
+            const scale = viewH / videoH;
+            const x = (mouseX - (viewW - videoW * scale) / 2) / scale;
+            const y = mouseY / scale;
+            return {x: x, y: y};
+        }
+    };
+
     constructor() {
         makeObservable(this);
 

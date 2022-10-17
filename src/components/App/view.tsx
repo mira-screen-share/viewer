@@ -10,6 +10,8 @@ export class App extends React.Component {
 
     componentDidMount() {
         window.addEventListener("beforeunload", this.model.terminate);
+        this.model.video.current!.onclick = this.model.onVideoClick;
+        this.model.video.current!.onwheel = this.model.onVideoWheel;
     }
 
     componentWillUnmount() {
@@ -28,6 +30,7 @@ export class App extends React.Component {
             >
                 <Grid flexGrow={1}>
                     <video
+                        ref={this.model.video}
                         autoPlay
                         muted
                         style={{
@@ -36,7 +39,6 @@ export class App extends React.Component {
                             height: "100%",
                             width: "100%",
                         }}
-                        ref={this.model.video}
                     />
                 </Grid>
                 <Grid
@@ -44,9 +46,8 @@ export class App extends React.Component {
                     justifyContent={"center"}
                     alignItems={"center"}
                     padding={3}
-                    style={{
-                        width: "100%",
-                    }}>
+                    width={"100%"}
+                >
                     <Fab
                         onClick={this.model.hasJoined ? this.model.leave : this.model.join}
                         color={this.model.hasJoined ? "error" : "success"}
