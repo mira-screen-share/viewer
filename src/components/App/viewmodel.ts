@@ -10,9 +10,11 @@ type MouseAction = "up" | "down" | "move";
 export class AppViewModel {
     private sharerConnection = new RTCPeerConnection(SharerConnectionConfig);
     private serverConnection: WebSocket;
+    private readonly room: string;
+    private readonly uuid = createUUID();
 
     @observable
-    private sharerEventChannel: RTCDataChannel | undefined = undefined
+    private sharerEventChannel?: RTCDataChannel = undefined;
 
     @observable
     private joined = false;
@@ -35,7 +37,6 @@ export class AppViewModel {
         this.sharerEventChannel = channel
     }
 
-    public readonly uuid = createUUID();
     public readonly video = React.createRef<HTMLVideoElement>();
 
     @computed
@@ -52,7 +53,7 @@ export class AppViewModel {
         this.serverConnection.send(
             JSON.stringify({
                 type: "join",
-                room: "00000000-0000-0000-0000-000000000000",
+                room: this.room,
                 uuid: this.uuid,
             })
         );
@@ -81,9 +82,10 @@ export class AppViewModel {
             || this.video.current!.videoHeight == 0) {
             return;
         }
-        if (action == "up") {
-            this.setHide(!this.hide);
-        }
+        // TODO Revamp full screen
+        // if (action == "up") {
+        //     this.setHide(!this.hide);
+        // }
         this.sharerEventChannel?.send(JSON.stringify({
             type: "mouse",
             action: action,
@@ -130,10 +132,10 @@ export class AppViewModel {
         makeObservable(this);
 
         const params = new URLSearchParams(window.location.search);
-        const room = params.get("room");
         const signaller = params.get("signaller") ?? SignallerUrl;
 
-        this.serverConnection = new WebSocket(signaller)
+        this.room = params.get("room")!;
+        this.serverConnection = new WebSocket(signaller);
 
         this.serverConnection.onmessage = (event) => {
             const signal = JSON.parse(event.data);
@@ -156,7 +158,7 @@ export class AppViewModel {
                                                 type: "answer",
                                                 sdp: description,
                                                 uuid: this.uuid,
-                                                to: room,
+                                                to: this.room,
                                             })
                                         );
                                         this.setJoined(true);
@@ -183,7 +185,7 @@ export class AppViewModel {
                         type: "ice",
                         ice: event.candidate,
                         uuid: this.uuid,
-                        to: room,
+                        to: this.room,
                     })
                 );
             }

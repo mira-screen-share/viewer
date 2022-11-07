@@ -1,6 +1,4 @@
-// export const SignallerUrl = "ws://localhost:8443";
 export const SignallerUrl = "ws://localhost:8443";
-// export const SignallerUrl = "ws://4.tcp.ngrok.io:13986";
 
 export const SharerConnectionConfig: RTCConfiguration = {
     iceServers: [
