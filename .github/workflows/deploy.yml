@@ -35,6 +35,8 @@ jobs:
           cache: yarn
       - name: Setup Pages
         uses: actions/configure-pages@v2
+      - name: Install dependencies
+        run: yarn install --immutable --immutable-cache --check-cache
       - name: Build
         run: yarn build
       - name: Upload artifact
