@@ -1,4 +1,4 @@
-export const SignallerUrl = "ws://localhost:8443";
+export const SignallerUrl = "wss://ws.mirashare.app";
 
 export const SharerConnectionConfig: RTCConfiguration = {
     iceServers: [

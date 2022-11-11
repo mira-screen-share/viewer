@@ -1,0 +1,19 @@
+name: Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Configure Node.js
+      uses: actions/setup-node@v3
+      with:
+        cache: 'yarn'
+    - run: yarn install --immutable --immutable-cache --check-cache
+    - run: yarn build
