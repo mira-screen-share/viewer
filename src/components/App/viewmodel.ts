@@ -9,17 +9,34 @@ type MouseAction = "up" | "down" | "move";
 
 export class AppViewModel {
     private sharerConnection = new RTCPeerConnection(SharerConnectionConfig);
-    private serverConnection = new WebSocket(SignallerUrl);
+    private serverConnection: WebSocket;
+    private readonly room: string;
+    private readonly uuid = createUUID();
+
+    @observable
+    private sharerEventChannel?: RTCDataChannel = undefined;
 
     @observable
     private joined = false;
+
+    @observable
+    private hide = false;
 
     @action
     private setJoined(joined: boolean) {
         this.joined = joined;
     }
 
-    public readonly uuid = createUUID();
+    @action
+    private setHide(hide: boolean) {
+        this.hide = hide;
+    }
+
+    @action
+    private setEventChannel(channel: RTCDataChannel) {
+        this.sharerEventChannel = channel
+    }
+
     public readonly video = React.createRef<HTMLVideoElement>();
 
     @computed
@@ -27,10 +44,16 @@ export class AppViewModel {
         return this.joined;
     }
 
+    @computed
+    public get isHiding() {
+        return this.hide;
+    }
+
     public join = () => {
         this.serverConnection.send(
             JSON.stringify({
                 type: "join",
+                room: this.room,
                 uuid: this.uuid,
             })
         );
@@ -59,11 +82,15 @@ export class AppViewModel {
             || this.video.current!.videoHeight == 0) {
             return;
         }
-        // console.log({
-        //     type: "mouse",
-        //     action: action,
-        //     ...this.toSharerCoordinate(event.offsetX, event.offsetY),
-        // });
+        // TODO Revamp full screen
+        // if (action == "up") {
+        //     this.setHide(!this.hide);
+        // }
+        this.sharerEventChannel?.send(JSON.stringify({
+            type: "mouse",
+            action: action,
+            ...this.toSharerCoordinate(event.offsetX, event.offsetY),
+        }))
     };
 
     public onVideoWheel = (event: WheelEvent) => {
@@ -72,12 +99,12 @@ export class AppViewModel {
             || this.video.current!.videoHeight == 0) {
             return;
         }
-        // console.log({
-        //     type: "scroll",
-        //     ...this.toSharerCoordinate(event.offsetX, event.offsetY),
-        //     dx: event.deltaX,
-        //     dy: event.deltaY,
-        // });
+        this.sharerEventChannel?.send(JSON.stringify({
+            type: "scroll",
+            ...this.toSharerCoordinate(event.offsetX, event.offsetY),
+            dx: event.deltaX,
+            dy: event.deltaY,
+        }))
     };
 
     private toSharerCoordinate = (mouseX: number, mouseY: number) => {
@@ -104,6 +131,12 @@ export class AppViewModel {
     constructor() {
         makeObservable(this);
 
+        const params = new URLSearchParams(window.location.search);
+        const signaller = params.get("signaller") ?? SignallerUrl;
+
+        this.room = params.get("room")!;
+        this.serverConnection = new WebSocket(signaller);
+
         this.serverConnection.onmessage = (event) => {
             const signal = JSON.parse(event.data);
             console.log(signal);
@@ -125,6 +158,7 @@ export class AppViewModel {
                                                 type: "answer",
                                                 sdp: description,
                                                 uuid: this.uuid,
+                                                to: this.room,
                                             })
                                         );
                                         this.setJoined(true);
@@ -142,13 +176,16 @@ export class AppViewModel {
             }
         };
 
+        this.sharerConnection.ondatachannel = (event) => this.setEventChannel(event.channel);
+
         this.sharerConnection.onicecandidate = (event) => {
             if (event.candidate != null) {
                 this.serverConnection.send(
                     JSON.stringify({
                         type: "ice",
                         ice: event.candidate,
-                        uuid: this.uuid
+                        uuid: this.uuid,
+                        to: this.room,
                     })
                 );
             }

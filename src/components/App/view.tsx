@@ -30,13 +30,13 @@ export class App extends React.Component {
                 overflow={"hidden"}
                 style={{background: "black"}}
             >
-                <Grid flexGrow={1}>
+                <Grid container justifyContent={"center"} flexGrow={1}>
                     <video
                         ref={this.model.video}
                         autoPlay
                         muted
                         style={{
-                            maxHeight: "calc(100vh - 110px)",
+                            maxHeight: this.model.isHiding ? "100vh" : "calc(100vh - 110px)",
                             maxWidth: "100vw",
                             height: "100%",
                             width: "100%",
@@ -49,6 +49,7 @@ export class App extends React.Component {
                     alignItems={"center"}
                     padding={3}
                     width={"100%"}
+                    hidden={this.model.isHiding}
                 >
                     <Fab
                         onClick={this.model.hasJoined ? this.model.leave : this.model.join}
