@@ -1,11 +1,16 @@
-import { createUUID } from "@/utils/uuid";
-import { SharerConnectionConfig, SignallerUrl } from "@/config/webrtc";
+import {createUUID} from "@/utils/uuid";
+import {SharerConnectionConfig, SignallerUrl} from "@/config/webrtc";
+// @ts-ignore
 import React from "react";
-import { action, computed, makeObservable, observable } from "mobx";
+// @ts-ignore
+import {action, computed, makeObservable, observable} from "mobx";
 
 const onError = (error: any) => console.log(error);
 
-type MouseAction = "up" | "down" | "move";
+type MouseAction = "mouse_up" | "mouse_down" | "mouse_move";
+type KeyAction = "key_up" | "key_down";
+const ButtonName = ["left", "middle", "right"];
+
 
 export class AppViewModel {
     private sharerConnection = new RTCPeerConnection(SharerConnectionConfig);
@@ -87,9 +92,24 @@ export class AppViewModel {
         //     this.setHide(!this.hide);
         // }
         this.sharerEventChannel?.send(JSON.stringify({
-            type: "mouse",
-            action: action,
+            type: action,
             ...this.toSharerCoordinate(event.offsetX, event.offsetY),
+            ...((action == "mouse_move") ? null : {
+                button: ButtonName[event.button]
+            }),
+        }))
+    };
+
+    public onKeyAction = (action: KeyAction) => (event: KeyboardEvent) => {
+        event.preventDefault();
+        if (this.video.current!.videoWidth == 0
+            || this.video.current!.videoHeight == 0) {
+            return;
+        }
+
+        this.sharerEventChannel?.send(JSON.stringify({
+            type: action,
+            key: event.keyCode,
         }))
     };
 
@@ -100,7 +120,7 @@ export class AppViewModel {
             return;
         }
         this.sharerEventChannel?.send(JSON.stringify({
-            type: "scroll",
+            type: "mouse_wheel",
             ...this.toSharerCoordinate(event.offsetX, event.offsetY),
             dx: event.deltaX,
             dy: event.deltaY,
@@ -118,13 +138,13 @@ export class AppViewModel {
             const scale = viewW / videoW;
             const x = mouseX / scale;
             const y = (mouseY - (viewH - videoH * scale) / 2) / scale;
-            return {x: x, y: y};
+            return {x: Math.round(x), y: Math.round(y)};
         } else {
             // Extra space on left and right
             const scale = viewH / videoH;
             const x = (mouseX - (viewW - videoW * scale) / 2) / scale;
             const y = mouseY / scale;
-            return {x: x, y: y};
+            return {x: Math.round(x), y: Math.round(y)};
         }
     };
 
