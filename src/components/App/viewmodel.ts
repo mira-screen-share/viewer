@@ -109,7 +109,7 @@ export class AppViewModel {
 
         this.sharerEventChannel?.send(JSON.stringify({
             type: action,
-            key: event.keyCode,
+            key: event.code,
         }))
     };
 
