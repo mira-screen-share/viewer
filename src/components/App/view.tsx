@@ -16,6 +16,7 @@ export class App extends React.Component {
         this.model.video.current!.onwheel = this.model.onVideoWheel;
         document.onkeydown = this.model.onKeyAction("key_down");
         document.onkeyup = this.model.onKeyAction("key_up");
+        document.oncontextmenu = () => false;
     }
 
     componentWillUnmount() {
