@@ -14,8 +14,8 @@ export class App extends React.Component {
         this.model.video.current!.onmousedown = this.model.onVideoMouse("mouse_down");
         this.model.video.current!.onmousemove = this.model.onVideoMouse("mouse_move");
         this.model.video.current!.onwheel = this.model.onVideoWheel;
-        this.model.video.current!.onkeydown = this.model.onKeyAction("key_down");
-        this.model.video.current!.onkeyup = this.model.onKeyAction("key_up");
+        document.onkeydown = this.model.onKeyAction("key_down");
+        document.onkeyup = this.model.onKeyAction("key_up");
     }
 
     componentWillUnmount() {
