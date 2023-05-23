@@ -167,13 +167,13 @@ export class AppViewModel {
       || this.video.current!.videoHeight == 0) {
       return;
     }
-    // if (this.isMouseEnabled) {
-    //   if (event.clientY <= window.innerWidth - 110) {
-    //     document.body.style.cursor = "none";
-    //   } else {
-    //     document.body.style.cursor = "default";
-    //   }
-    // }
+    if (this.isMouseEnabled) {
+      if (event.clientY <= window.innerWidth - 110) {
+        document.body.style.cursor = "none";
+      } else {
+        document.body.style.cursor = "default";
+      }
+    }
     if (action == "mouse_move" && !this.isMouseTrackEnabled && !event.buttons) {
       return;
     }
