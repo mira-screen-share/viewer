@@ -58,14 +58,12 @@ export class AppViewModel {
       this.video.current!.onmousemove = this.onVideoMouse("mouse_move");
       this.video.current!.onwheel = this.onVideoWheel;
       document.oncontextmenu = () => false;
-      document.body.style.cursor = "none";
     } else {
       this.video.current!.onmouseup = null;
       this.video.current!.onmousedown = null;
       this.video.current!.onmousemove = null;
       this.video.current!.onwheel = null;
       document.oncontextmenu = null;
-      document.body.style.cursor = "default";
     }
   }
 
@@ -167,15 +165,13 @@ export class AppViewModel {
       || this.video.current!.videoHeight == 0) {
       return;
     }
-    if (this.isMouseEnabled) {
-      if (event.clientY <= window.innerWidth - 110) {
+    if (action == "mouse_move" && !event.buttons) {
+      if (this.isMouseTrackEnabled) {
         document.body.style.cursor = "none";
       } else {
         document.body.style.cursor = "default";
-      }
-    }
-    if (action == "mouse_move" && !this.isMouseTrackEnabled && !event.buttons) {
-      return;
+        return;
+      } 
     }
     this.sharerEventChannel?.send(JSON.stringify({
       type: action,
