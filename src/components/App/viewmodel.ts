@@ -293,7 +293,16 @@ export class AppViewModel {
     };
 
     this.sharerConnection.ontrack = (event) => {
-      this.video.current!.srcObject = event.streams[0];
+      if(event.track.kind == "video") {
+        this.video.current!.srcObject = event.streams[0];
+      } else if (event.track.kind == "audio") {
+        const audio_elem = document.createElement("audio");
+        audio_elem.srcObject = event.streams[0];
+        //alert(1);
+        audio_elem.play();
+      } else {
+        console.log("Unknown track: " + event.track.name);
+      }
     };
   }
 }
