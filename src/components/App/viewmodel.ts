@@ -17,6 +17,7 @@ export class AppViewModel {
   private serverConnection: WebSocket;
   private readonly room: string;
   private readonly uuid = createUUID();
+  private audioElement = document.createElement("audio");
 
   @observable
   private sharerEventChannel?: RTCDataChannel = undefined;
@@ -38,6 +39,9 @@ export class AppViewModel {
 
   @observable
   private fullScreen = false;
+
+  @observable
+  private showInteractPrompt = false;
 
   @action
   private setJoined(joined: boolean) {
@@ -131,6 +135,11 @@ export class AppViewModel {
     return this.fullScreen;
   }
 
+  @computed
+  public get isInteractPrompt() {
+    return this.showInteractPrompt;
+  }
+
   public join = () => {
     this.serverConnection.send(
       JSON.stringify({
@@ -203,6 +212,11 @@ export class AppViewModel {
       dy: event.deltaY,
     }))
   };
+
+  public retryAudio = () => {
+    this.audioElement.play();
+    this.showInteractPrompt = false;
+  }
 
   private toSharerCoordinate = (mouseX: number, mouseY: number) => {
     const viewW = this.video.current!.offsetWidth;
@@ -296,10 +310,10 @@ export class AppViewModel {
       if(event.track.kind == "video") {
         this.video.current!.srcObject = event.streams[0];
       } else if (event.track.kind == "audio") {
-        const audio_elem = document.createElement("audio");
-        audio_elem.srcObject = event.streams[0];
-        //alert(1);
-        audio_elem.play();
+        this.audioElement.srcObject = event.streams[0];
+        this.audioElement.play().catch(() => {
+          this.showInteractPrompt = true;
+        });
       } else {
         console.log("Unknown track: " + event.track.name);
       }
