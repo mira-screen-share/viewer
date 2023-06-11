@@ -1,7 +1,7 @@
 import React from "react";
 import { AppViewModel } from "@/components/App/viewmodel";
 import { observer } from "mobx-react";
-import { Fab, Grid, TextField, ThemeProvider } from "@mui/material";
+import {Box, Fab, Grid, Modal, TextField, ThemeProvider, Typography} from "@mui/material";
 import { CallEnd, ChevronLeft, ChevronRight, Fullscreen, Keyboard, Mouse, Phone } from "@mui/icons-material";
 import "./index.css"
 import { Theme } from "@/config/theme";
@@ -23,6 +23,20 @@ export class App extends React.Component {
     render() {
         return (
           <ThemeProvider theme={Theme}>
+            <Modal disableAutoFocus={true} open={this.model.isInteractPrompt} onClose={this.model.retryAudio}>
+              <Box style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  color: "white",
+                  transform: "translate(-50%, -50%)",
+                  textAlign: "center",
+              }}>
+                  <Typography align={"center"}>
+                      Press anywhere to continue
+                  </Typography>
+              </Box>
+            </Modal>
             <Grid
                 container
                 width={"100vw"}
