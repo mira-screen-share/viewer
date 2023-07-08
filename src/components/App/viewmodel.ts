@@ -146,7 +146,7 @@ export class AppViewModel {
       JSON.stringify({
         type: "join",
         room: this.room,
-        uuid: this.uuid,
+        from: this.uuid,
         auth: { "type": "password", "password": this.password }
       })
     );
@@ -157,7 +157,7 @@ export class AppViewModel {
     this.serverConnection.send(
       JSON.stringify({
         type: "leave",
-        uuid: this.uuid,
+        from: this.uuid,
       })
     );
     this.setJoined(false);
@@ -275,7 +275,7 @@ export class AppViewModel {
                           JSON.stringify({
                             type: "answer",
                             sdp: description,
-                            uuid: this.uuid,
+                            from: this.uuid,
                             to: this.room,
                           })
                         );
@@ -305,7 +305,7 @@ export class AppViewModel {
           JSON.stringify({
             type: "ice",
             ice: event.candidate,
-            uuid: this.uuid,
+            from: this.uuid,
             to: this.room,
           })
         );
