@@ -16,6 +16,7 @@ export class AppViewModel {
   private sharerConnection = new RTCPeerConnection(SharerConnectionConfig);
   private serverConnection: WebSocket;
   private readonly room: string;
+  private readonly password: string;
   private readonly uuid = createUUID();
   private audioElement = document.createElement("audio");
 
@@ -145,7 +146,8 @@ export class AppViewModel {
       JSON.stringify({
         type: "join",
         room: this.room,
-        uuid: this.uuid,
+        from: this.uuid,
+        auth: { "type": "password", "password": this.password }
       })
     );
   };
@@ -155,7 +157,7 @@ export class AppViewModel {
     this.serverConnection.send(
       JSON.stringify({
         type: "leave",
-        uuid: this.uuid,
+        from: this.uuid,
       })
     );
     this.setJoined(false);
@@ -246,6 +248,7 @@ export class AppViewModel {
     const signaller = params.get("signaller") ?? SignallerUrl;
 
     this.room = params.get("room")!;
+    this.password = params.get("pwd")!;
     this.serverConnection = new WebSocket(signaller);
 
     this.serverConnection.onopen = () => {
@@ -272,7 +275,7 @@ export class AppViewModel {
                           JSON.stringify({
                             type: "answer",
                             sdp: description,
-                            uuid: this.uuid,
+                            from: this.uuid,
                             to: this.room,
                           })
                         );
@@ -285,6 +288,9 @@ export class AppViewModel {
           this.sharerConnection
               .addIceCandidate(new RTCIceCandidate(signal.ice))
               .catch(onError);
+          break;
+        case "join_declined":
+          alert("Join declined: Reason = " + signal.reason);
           break;
         default:
           break;
@@ -299,7 +305,7 @@ export class AppViewModel {
           JSON.stringify({
             type: "ice",
             ice: event.candidate,
-            uuid: this.uuid,
+            from: this.uuid,
             to: this.room,
           })
         );
