@@ -275,10 +275,6 @@ export class AppViewModel {
     this.password = params.get("pwd") ?? "";
     this.serverConnection = new WebSocket(signaller);
 
-    // this.serverConnection.onopen = () => {
-    //   this.join()
-    // }
-
     this.serverConnection.onmessage = (event) => {
       const signal = JSON.parse(event.data);
       console.log(signal);
