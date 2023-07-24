@@ -15,10 +15,14 @@ const ButtonName = ["left", "middle", "right"];
 export class AppViewModel {
   private sharerConnection = new RTCPeerConnection(SharerConnectionConfig);
   private serverConnection: WebSocket;
-  private readonly room: string;
-  private readonly password: string;
   private readonly uuid = createUUID();
   private audioElement = document.createElement("audio");
+
+  @observable
+  private room: string = "";
+
+  @observable
+  private password: string = "";
 
   @observable
   private sharerEventChannel?: RTCDataChannel = undefined;
@@ -52,6 +56,16 @@ export class AppViewModel {
   @action
   public setHide = (hide: boolean) => () => {
     this.hide = hide;
+  }
+
+  @action
+  public setRoom = (room: string) => {
+    this.room = room;
+  }
+
+  @action
+  public setPassword = (password: string) => {
+    this.password = password;
   }
 
   @action
@@ -139,6 +153,16 @@ export class AppViewModel {
   @computed
   public get isInteractPrompt() {
     return this.showInteractPrompt;
+  }
+
+  @computed
+  public get getRoom() {
+    return this.room;
+  }
+
+  @computed
+  public get getPassword() {
+    return this.password;
   }
 
   public join = () => {
@@ -247,13 +271,13 @@ export class AppViewModel {
     const params = new URLSearchParams(window.location.search);
     const signaller = params.get("signaller") ?? SignallerUrl;
 
-    this.room = params.get("room")!;
-    this.password = params.get("pwd")!;
+    this.room = params.get("room") ?? "";
+    this.password = params.get("pwd") ?? "";
     this.serverConnection = new WebSocket(signaller);
 
-    this.serverConnection.onopen = () => {
-      this.join()
-    }
+    // this.serverConnection.onopen = () => {
+    //   this.join()
+    // }
 
     this.serverConnection.onmessage = (event) => {
       const signal = JSON.parse(event.data);
@@ -263,6 +287,7 @@ export class AppViewModel {
 
       switch (signal.type) {
         case "offer": // Offer from sharer
+          this.setJoined(true);
           this.sharerConnection
               .setRemoteDescription(new RTCSessionDescription(signal.sdp))
               .then(() => {
@@ -279,7 +304,6 @@ export class AppViewModel {
                             to: this.room,
                           })
                         );
-                        this.setJoined(true);
                       }).catch(onError);
                 }).catch(onError);
               }).catch(onError);
@@ -313,6 +337,7 @@ export class AppViewModel {
     };
 
     this.sharerConnection.ontrack = (event) => {
+      console.log(2)
       if(event.track.kind == "video") {
         this.video.current!.srcObject = event.streams[0];
       } else if (event.track.kind == "audio") {
