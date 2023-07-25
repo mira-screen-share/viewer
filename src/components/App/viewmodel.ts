@@ -19,6 +19,9 @@ export class AppViewModel {
   private audioElement = document.createElement("audio");
 
   @observable
+  private name: string = "";
+
+  @observable
   private room: string = "";
 
   @observable
@@ -61,6 +64,11 @@ export class AppViewModel {
   @action
   public setRoom = (room: string) => {
     this.room = room;
+  }
+
+  @action
+  public setName = (name: string) => {
+    this.name = name;
   }
 
   @action
@@ -161,6 +169,11 @@ export class AppViewModel {
   }
 
   @computed
+  public get getName() {
+    return this.name;
+  }
+
+  @computed
   public get getPassword() {
     return this.password;
   }
@@ -171,6 +184,7 @@ export class AppViewModel {
         type: "join",
         room: this.room,
         from: this.uuid,
+        name: this.name,
         auth: { "type": "password", "password": this.password }
       })
     );
@@ -277,7 +291,6 @@ export class AppViewModel {
 
     this.serverConnection.onmessage = (event) => {
       const signal = JSON.parse(event.data);
-      console.log(signal);
 
       if (signal.uuid == this.uuid) return;
 

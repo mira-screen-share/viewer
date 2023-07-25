@@ -132,6 +132,15 @@ export class App extends React.Component {
                 maxWidth={"xs"}
             >
                 <TextField
+                    label={"Your Name"}
+                    variant={"outlined"}
+                    color={"primary"}
+                    fullWidth
+                    margin={"normal"}
+                    value={this.model.getName}
+                    onChange={event => this.model.setName(event.target.value)}
+                />
+                <TextField
                     label={"Room"}
                     variant={"outlined"}
                     color={"primary"}
