@@ -164,9 +164,7 @@ export class AppViewModel {
   };
 
   public terminate = () => {
-    if (this.hasJoined) {
-      this.leave();
-    }
+    this.leave();
     this.serverConnection.close();
   };
 
