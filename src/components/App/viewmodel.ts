@@ -1,9 +1,9 @@
-import { createUUID } from "@/utils/uuid";
-import { SharerConnectionConfig, SignallerUrl } from "@/config/webrtc";
+import {createUUID} from "@/utils/uuid";
+import {SharerConnectionConfig, SignallerUrl} from "@/config/webrtc";
 // @ts-ignore
 import React from "react";
 // @ts-ignore
-import { action, computed, makeObservable, observable } from "mobx";
+import {action, computed, makeObservable, observable} from "mobx";
 
 const onError = (error: any) => console.log(error);
 
@@ -185,7 +185,7 @@ export class AppViewModel {
         room: this.room,
         from: this.uuid,
         name: this.name,
-        auth: { "type": "password", "password": this.password }
+        auth: {"type": "password", "password": this.password}
       })
     );
   };
@@ -193,25 +193,23 @@ export class AppViewModel {
   public leave = () => {
     this.sharerConnection.close();
     this.serverConnection.send(
-      JSON.stringify({
-        type: "leave",
-        from: this.uuid,
-      })
+        JSON.stringify({
+          type: "leave",
+          from: this.uuid,
+        })
     );
     this.setJoined(false);
   };
 
   public terminate = () => {
-    if (this.hasJoined) {
-      this.leave();
-    }
+    this.leave();
     this.serverConnection.close();
   };
 
   public onVideoMouse = (action: MouseAction) => (event: MouseEvent) => {
     event.preventDefault();
     if (this.video.current!.videoWidth == 0
-      || this.video.current!.videoHeight == 0) {
+        || this.video.current!.videoHeight == 0) {
       return;
     }
     if (action == "mouse_move" && !this.isMouseTrackEnabled && !event.buttons) {
@@ -229,7 +227,7 @@ export class AppViewModel {
   public onKeyAction = (action: KeyAction) => (event: KeyboardEvent) => {
     event.preventDefault();
     if (this.video.current!.videoWidth == 0
-      || this.video.current!.videoHeight == 0) {
+        || this.video.current!.videoHeight == 0) {
       return;
     }
 
@@ -242,7 +240,7 @@ export class AppViewModel {
   public onVideoWheel = (event: WheelEvent) => {
     event.preventDefault();
     if (this.video.current!.videoWidth == 0
-      || this.video.current!.videoHeight == 0) {
+        || this.video.current!.videoHeight == 0) {
       return;
     }
     this.sharerEventChannel?.send(JSON.stringify({
@@ -297,6 +295,19 @@ export class AppViewModel {
       switch (signal.type) {
         case "offer": // Offer from sharer
           this.setJoined(true);
+          this.sharerConnection.setConfiguration({
+            iceServers: signal.ice_servers.map((ice: {
+              urls: [string];
+              username: string;
+              credential: string;
+              credential_type: string;
+            }) => ({
+              urls: ice.urls,
+              username: ice.username,
+              credential: ice.credential,
+              credentialType: ice.credential_type.toLowerCase(),
+            })),
+          });
           this.sharerConnection
               .setRemoteDescription(new RTCSessionDescription(signal.sdp))
               .then(() => {
@@ -306,12 +317,12 @@ export class AppViewModel {
                       .setLocalDescription(description)
                       .then(() => {
                         this.serverConnection.send(
-                          JSON.stringify({
-                            type: "answer",
-                            sdp: description,
-                            from: this.uuid,
-                            to: this.room,
-                          })
+                            JSON.stringify({
+                              type: "answer",
+                              sdp: description,
+                              from: this.uuid,
+                              to: this.room,
+                            })
                         );
                       }).catch(onError);
                 }).catch(onError);
@@ -335,19 +346,18 @@ export class AppViewModel {
     this.sharerConnection.onicecandidate = (event) => {
       if (event.candidate != null) {
         this.serverConnection.send(
-          JSON.stringify({
-            type: "ice",
-            ice: event.candidate,
-            from: this.uuid,
-            to: this.room,
-          })
+            JSON.stringify({
+              type: "ice",
+              ice: event.candidate,
+              from: this.uuid,
+              to: this.room,
+            })
         );
       }
     };
 
     this.sharerConnection.ontrack = (event) => {
-      console.log(2)
-      if(event.track.kind == "video") {
+      if (event.track.kind == "video") {
         this.video.current!.srcObject = event.streams[0];
       } else if (event.track.kind == "audio") {
         this.audioElement.srcObject = event.streams[0];
