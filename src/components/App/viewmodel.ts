@@ -15,10 +15,17 @@ const ButtonName = ["left", "middle", "right"];
 export class AppViewModel {
   private sharerConnection = new RTCPeerConnection(SharerConnectionConfig);
   private serverConnection: WebSocket;
-  private readonly room: string;
-  private readonly password: string;
   private readonly uuid = createUUID();
   private audioElement = document.createElement("audio");
+
+  @observable
+  private name: string = "";
+
+  @observable
+  private room: string = "";
+
+  @observable
+  private password: string = "";
 
   @observable
   private sharerEventChannel?: RTCDataChannel = undefined;
@@ -52,6 +59,21 @@ export class AppViewModel {
   @action
   public setHide = (hide: boolean) => () => {
     this.hide = hide;
+  }
+
+  @action
+  public setRoom = (room: string) => {
+    this.room = room;
+  }
+
+  @action
+  public setName = (name: string) => {
+    this.name = name;
+  }
+
+  @action
+  public setPassword = (password: string) => {
+    this.password = password;
   }
 
   @action
@@ -141,14 +163,30 @@ export class AppViewModel {
     return this.showInteractPrompt;
   }
 
+  @computed
+  public get getRoom() {
+    return this.room;
+  }
+
+  @computed
+  public get getName() {
+    return this.name;
+  }
+
+  @computed
+  public get getPassword() {
+    return this.password;
+  }
+
   public join = () => {
     this.serverConnection.send(
-        JSON.stringify({
-          type: "join",
-          room: this.room,
-          from: this.uuid,
-          auth: {"type": "password", "password": this.password}
-        })
+      JSON.stringify({
+        type: "join",
+        room: this.room,
+        from: this.uuid,
+        name: this.name,
+        auth: {"type": "password", "password": this.password}
+      })
     );
   };
 
@@ -245,17 +283,12 @@ export class AppViewModel {
     const params = new URLSearchParams(window.location.search);
     const signaller = params.get("signaller") ?? SignallerUrl;
 
-    this.room = params.get("room")!;
-    this.password = params.get("pwd")!;
+    this.room = params.get("room") ?? "";
+    this.password = params.get("pwd") ?? "";
     this.serverConnection = new WebSocket(signaller);
-
-    this.serverConnection.onopen = () => {
-      this.join()
-    }
 
     this.serverConnection.onmessage = (event) => {
       const signal = JSON.parse(event.data);
-      console.log(signal);
 
       if (signal.uuid == this.uuid) return;
 
@@ -291,7 +324,6 @@ export class AppViewModel {
                               to: this.room,
                             })
                         );
-                        this.setJoined(true);
                       }).catch(onError);
                 }).catch(onError);
               }).catch(onError);
