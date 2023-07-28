@@ -34,6 +34,9 @@ export class AppViewModel {
   private joined = false;
 
   @observable
+  private pendingApproval = false;
+
+  @observable
   private hide = false;
 
   @observable
@@ -74,6 +77,11 @@ export class AppViewModel {
   @action
   public setPassword = (password: string) => {
     this.password = password;
+  }
+
+  @action
+  public setPendingApproval = (pendingApproval: boolean) => {
+    this.pendingApproval = pendingApproval;
   }
 
   @action
@@ -178,6 +186,11 @@ export class AppViewModel {
     return this.password;
   }
 
+  @computed
+  public get getPendingApproval() {
+    return this.pendingApproval;
+  }
+
   public join = () => {
     this.serverConnection.send(
       JSON.stringify({
@@ -188,6 +201,7 @@ export class AppViewModel {
         auth: {"type": "password", "password": this.password}
       })
     );
+    this.setPendingApproval(true); // TODO refactor this into FSM
   };
 
   public leave = () => {
@@ -199,6 +213,7 @@ export class AppViewModel {
         })
     );
     this.setJoined(false);
+    window.location.reload();
   };
 
   public terminate = () => {
@@ -294,6 +309,7 @@ export class AppViewModel {
 
       switch (signal.type) {
         case "offer": // Offer from sharer
+          this.setPendingApproval(false);
           this.setJoined(true);
           this.sharerConnection.setConfiguration({
             iceServers: signal.ice_servers.map((ice: {
@@ -334,6 +350,7 @@ export class AppViewModel {
               .catch(onError);
           break;
         case "join_declined":
+          this.setPendingApproval(false);
           alert("Join declined: Reason = " + signal.reason);
           break;
         default:

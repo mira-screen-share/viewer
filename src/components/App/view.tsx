@@ -1,7 +1,7 @@
 import React from "react";
 import { AppViewModel } from "@/components/App/viewmodel";
 import { observer } from "mobx-react";
-import { Button, Fab, Grid, Stack, TextField, ThemeProvider } from "@mui/material";
+import { Button, CircularProgress, Fab, Grid, Stack, TextField, ThemeProvider } from "@mui/material";
 import { CallEnd, ChevronLeft, ChevronRight, Fullscreen, Keyboard, Login } from "@mui/icons-material";
 import "./index.css";
 import { Theme } from "@/config/theme";
@@ -158,17 +158,30 @@ export class App extends React.Component {
                     value={this.model.getPassword}
                     onChange={event => this.model.setPassword(event.target.value)}
                 />
-                <Button
-                    variant={"contained"}
-                    color={"primary"}
-                    style={{
-                        marginTop: "1rem",
-                    }}
-                    startIcon={<Login/>}
-                    onClick={this.model.join}
-                >
-                    Join
-                </Button>
+                {this.model.getPendingApproval ? (
+                    <Button
+                        variant={"contained"}
+                        color={"primary"}
+                        style={{
+                            marginTop: "1rem",
+                        }}
+                        startIcon={<CircularProgress size={20} style={{color: "white"}} />}
+                    >
+                        Pending Approval
+                    </Button>
+                ) : (
+                    <Button
+                        variant={"contained"}
+                        color={"primary"}
+                        style={{
+                            marginTop: "1rem",
+                        }}
+                        startIcon={<Login/>}
+                        onClick={this.model.join}
+                    >
+                        Join
+                    </Button>
+                )}
             </Stack>
         </Grid>
     );
