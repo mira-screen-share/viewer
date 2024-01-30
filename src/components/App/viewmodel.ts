@@ -1,7 +1,7 @@
 import {createUUID} from "@/utils/uuid";
 import {SharerConnectionConfig, SignallerUrl} from "@/config/webrtc";
 // @ts-ignore
-import React from "react";
+import React, {FormEvent} from "react";
 // @ts-ignore
 import {action, computed, makeObservable, observable} from "mobx";
 
@@ -191,7 +191,8 @@ export class AppViewModel {
     return this.pendingApproval;
   }
 
-  public join = () => {
+  public join = (e: FormEvent) => {
+    e.preventDefault();
     this.serverConnection.send(
       JSON.stringify({
         type: "join",

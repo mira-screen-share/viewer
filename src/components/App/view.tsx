@@ -126,6 +126,8 @@ export class App extends React.Component {
             justifyContent={"center"}
         >
             <Stack
+                onSubmit={this.model.join}
+                component={"form"}
                 justifyContent={"center"}
                 alignItems={"center"}
                 padding={3}
@@ -139,6 +141,7 @@ export class App extends React.Component {
                     margin={"normal"}
                     value={this.model.getName}
                     onChange={event => this.model.setName(event.target.value)}
+                    required={true}
                 />
                 <TextField
                     label={"Room"}
@@ -158,30 +161,21 @@ export class App extends React.Component {
                     value={this.model.getPassword}
                     onChange={event => this.model.setPassword(event.target.value)}
                 />
-                {this.model.getPendingApproval ? (
-                    <Button
-                        variant={"contained"}
-                        color={"primary"}
-                        style={{
-                            marginTop: "1rem",
-                        }}
-                        startIcon={<CircularProgress size={20} style={{color: "white"}} />}
-                    >
-                        Pending Approval
-                    </Button>
-                ) : (
-                    <Button
-                        variant={"contained"}
-                        color={"primary"}
-                        style={{
-                            marginTop: "1rem",
-                        }}
-                        startIcon={<Login/>}
-                        onClick={this.model.join}
-                    >
-                        Join
-                    </Button>
-                )}
+                <Button
+                    type={"submit"}
+                    variant={"contained"}
+                    color={"primary"}
+                    style={{
+                        marginTop: "1rem",
+                    }}
+                    startIcon={
+                        this.model.getPendingApproval ? (
+                            <CircularProgress size={20} style={{color: "white"}} />
+                        ) : <Login/>
+                    }
+                >
+                    {this.model.getPendingApproval ? "Pending Approval" : "Join"}
+                </Button>
             </Stack>
         </Grid>
     );
