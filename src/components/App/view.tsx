@@ -8,6 +8,9 @@ import { Theme } from "@/config/theme";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowPointer } from "@fortawesome/free-solid-svg-icons";
 
+import logoImage from "/public/512x512@2x.png";
+import { LazyLoadImage } from "react-lazy-load-image-component";
+
 @observer
 export class App extends React.Component {
     private model = new AppViewModel();
@@ -124,6 +127,7 @@ export class App extends React.Component {
             overflow={"hidden"}
             alignItems={"center"}
             justifyContent={"center"}
+            style={{background: "#D0BCFF"}}
         >
             <Stack
                 onSubmit={this.model.join}
@@ -133,6 +137,11 @@ export class App extends React.Component {
                 padding={3}
                 maxWidth={"xs"}
             >
+                <LazyLoadImage style={{
+                    width: "196px",
+                    height: "196px",
+                    zIndex: 1,
+                }} src={logoImage}/>
                 <TextField
                     label={"Your Name"}
                     variant={"outlined"}
@@ -151,6 +160,7 @@ export class App extends React.Component {
                     margin={"normal"}
                     value={this.model.getRoom}
                     onChange={event => this.model.setRoom(event.target.value)}
+                    required={true}
                 />
                 <TextField
                     label={"Passcode"}
@@ -160,6 +170,7 @@ export class App extends React.Component {
                     margin={"normal"}
                     value={this.model.getPassword}
                     onChange={event => this.model.setPassword(event.target.value)}
+                    required={true}
                 />
                 <Button
                     type={"submit"}
@@ -170,7 +181,7 @@ export class App extends React.Component {
                     }}
                     startIcon={
                         this.model.getPendingApproval ? (
-                            <CircularProgress size={20} style={{color: "white"}} />
+                            <CircularProgress size={20} style={{color: "white"}}/>
                         ) : <Login/>
                     }
                 >
