@@ -8,7 +8,7 @@ import { Theme } from "@/config/theme";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowPointer } from "@fortawesome/free-solid-svg-icons";
 
-import logoImage from "/public/512x512@2x.png";
+import logoImage from "@/img/512x512@2x.png";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 
 @observer
