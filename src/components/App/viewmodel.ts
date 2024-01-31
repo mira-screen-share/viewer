@@ -11,7 +11,6 @@ type MouseAction = "mouse_up" | "mouse_down" | "mouse_move";
 type KeyAction = "key_up" | "key_down";
 const ButtonName = ["left", "middle", "right"];
 
-
 export class AppViewModel {
   private sharerConnection = new RTCPeerConnection(SharerConnectionConfig);
   private serverConnection: WebSocket;
