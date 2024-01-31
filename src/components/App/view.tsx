@@ -173,7 +173,7 @@ export class App extends React.Component {
                     required={true}
                 />
                 <Button
-                    type={"submit"}
+                    type={this.model.getPendingApproval ? "button" : "submit"}
                     variant={"contained"}
                     color={"primary"}
                     style={{
