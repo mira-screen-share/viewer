@@ -205,15 +205,16 @@ export class AppViewModel {
   };
 
   public leave = () => {
-    this.sharerConnection.close();
-    this.serverConnection.send(
-        JSON.stringify({
-          type: "leave",
-          from: this.uuid,
-        })
-    );
-    this.setJoined(false);
-    window.location.reload();
+    if (this.hasJoined) {
+      this.setJoined(false);
+      this.sharerConnection.close();
+      this.serverConnection.send(
+          JSON.stringify({
+            type: "leave",
+            from: this.uuid,
+          })
+      );
+    }
   };
 
   public terminate = () => {
@@ -352,6 +353,11 @@ export class AppViewModel {
         case "join_declined":
           this.setPendingApproval(false);
           alert("Join declined: Reason = " + signal.reason);
+          break;
+        case "room_closed":
+          this.sharerConnection.close();
+          this.setJoined(false);
+          window.location.reload();
           break;
         default:
           break;
