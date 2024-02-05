@@ -14,6 +14,7 @@ const ButtonName = ["left", "middle", "right"];
 export class AppViewModel {
   private sharerConnection = new RTCPeerConnection(SharerConnectionConfig);
   private serverConnection: WebSocket;
+  private serverKeepAlive: NodeJS.Timeout | undefined;
   private readonly uuid = createUUID();
   private audioElement = document.createElement("audio");
 
@@ -363,6 +364,16 @@ export class AppViewModel {
           break;
       }
     };
+
+    this.serverConnection.onopen = () => {
+      this.serverKeepAlive = setInterval(() => {
+        this.serverConnection.send(JSON.stringify({type: "keep_alive"}));
+      }, 30000);
+    };
+
+    this.serverConnection.onclose = () => {
+      clearInterval(this.serverKeepAlive);
+    }
 
     this.sharerConnection.ondatachannel = (event) => this.setEventChannel(event.channel);
 
