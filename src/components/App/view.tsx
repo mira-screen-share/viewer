@@ -102,7 +102,10 @@ export class App extends React.Component {
                 <Grid item>
                     <Fab
                         style={{width: 40, height: 56, borderRadius: 20}}
-                        onClick={this.model.leave}
+                        onClick={() => {
+                            this.model.leave();
+                            window.location.reload();
+                        }}
                         color={"error"}
                     >
                         {<CallEnd/>}
